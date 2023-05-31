@@ -3,14 +3,11 @@ public class ReclameAquiCallouts {
     	
     public static HttpResponse makeGetCallout(String id) {
         TicketById resposta;
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint('callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_Ticket').Endpoint__c+id);
-        request.setMethod('GET');
-        HttpResponse response = http.send(request);
+        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_Ticket').Endpoint__c+id;
+        HttpResponse response = sendGetCallout(callout);
         String conteudo = response.getBody();
         if(response.getStatusCode() == 200) {
-        resposta = (TicketById) JSON.deserialize(response.getBody(), TicketById.class);
+            resposta = (TicketById) JSON.deserialize(response.getBody(), TicketById.class);
         }
         System.debug(resposta);
         System.debug(conteudo);
@@ -18,28 +15,26 @@ public class ReclameAquiCallouts {
     }
     
     public static HttpResponse makePostCallout(String ticketId, String message) {
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint('callout:ReclameAquiURL/services/apexrest/Tickets/');
-        request.setMethod('POST');
-        request.setHeader('Content-Type', 'application/json');
-        request.setBody('{"ticketid":"'+ ticketId + '",' + '"message":"' + message +'"}');
-        HttpResponse response  = http.send(request);
-        PublicMessageResponse resposta = (PublicMessageResponse) JSON.deserialize(response.getBody(), PublicMessageResponse.class);
+        PublicMessageResponse resposta;
+        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_Ticket').Endpoint__c;
+        String body = '{"ticketid":"'+ ticketId + '",' + '"message":"' + message +'"}';
+        HttpResponse response  = sendPostCallout(callout, body);
+        if(response.getStatusCode() == 200) {
+        resposta = (PublicMessageResponse) JSON.deserialize(response.getBody(), PublicMessageResponse.class);
+        }
         System.debug(resposta);
         return response;
          
     }
     
     public static HttpResponse makePostEvaluationCallout(String id) {
-        Http http = new Http();
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint('callout:ReclameAquiURL/services/apexrest/TicketEvaluation');
-        request.setMethod('POST');
-        request.setBody('{"id":"' + id + '"}');
-        request.setHeader('Content-Type', 'application/json');
-        HttpResponse response = http.send(request);
-        TicketEvaluation resposta = (TicketEvaluation) JSON.deserialize(response.getBody(), TicketEvaluation.class);
+        TicketEvaluation resposta;
+        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_TicketEvaluation').Endpoint__c;
+        String body = '{"id":"' + id + '"}';
+        HttpResponse response = sendPostCallout(callout, body);
+        if(response.getStatusCode() == 200) {
+        resposta = (TicketEvaluation) JSON.deserialize(response.getBody(), TicketEvaluation.class);
+        }
         System.debug(resposta);
         return response;
         
@@ -47,11 +42,23 @@ public class ReclameAquiCallouts {
     }
     
     
-    private HttpReponse sendGetCallout(String url){
+    private static HttpResponse sendGetCallout(String url){
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint(url);
-        request.setMehtod(Callout_Setting__mdt.getInstance('MethodGET').Method__c);
-        HttpResponse = http.send(request);
+        request.setMethod(Callout_Setting__mdt.getInstance('MethodGET').Method__c);
+        HttpResponse response = http.send(request);
+        return response;
+    }
+
+    private static HttpResponse sendPostCallout(String url, String body){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(url);
+        request.setMethod(Callout_Setting__mdt.getInstance('MethodPOST').Method__c);
+        request.setHeader(Callout_Setting__mdt.getInstance('HeaderCA').Header__c, Callout_Setting__mdt.getInstance('HeaderCA').Value_Header__c);
+        request.setBody(body);
+        HttpResponse response = http.send(request);
+        return response;
     }
 }
