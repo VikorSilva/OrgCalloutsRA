@@ -1,46 +1,52 @@
 public class ReclameAquiCallouts {
 		
     	
-    public static HttpResponse makeGetCallout(String id) {
-        TicketById resposta;
-        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_Ticket').Endpoint__c+id;
-        HttpResponse response = sendGetCallout(callout);
-        String conteudo = response.getBody();
+    public static HttpResponse getTicketById(String id) {
+        TicketById content;
+        String url = makeUrlRA('RA_Ticket');
+        HttpResponse response = sendGetCallout(url + id);
+
         if(response.getStatusCode() == 200) {
-            resposta = (TicketById) JSON.deserialize(response.getBody(), TicketById.class);
+            content = (TicketById) JSON.deserialize(response.getBody(), TicketById.class);
         }
-        System.debug(resposta);
-        System.debug(conteudo);
+        System.debug(content);
         return response;
     }
     
-    public static HttpResponse makePostCallout(String ticketId, String message) {
-        PublicMessageResponse resposta;
-        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_Ticket').Endpoint__c;
+    public static HttpResponse sendPublicMessage(String ticketId, String message) {
+        PublicMessageResponse content;
+        String url = makeUrlRA('RA_Ticket');
         String body = '{"ticketid":"'+ ticketId + '",' + '"message":"' + message +'"}';
-        HttpResponse response  = sendPostCallout(callout, body);
+        HttpResponse response  = sendPostCallout(url, body);
+
         if(response.getStatusCode() == 200) {
-        resposta = (PublicMessageResponse) JSON.deserialize(response.getBody(), PublicMessageResponse.class);
+        content = (PublicMessageResponse) JSON.deserialize(response.getBody(), PublicMessageResponse.class);
         }
-        System.debug(resposta);
+        System.debug(content);
         return response;
          
     }
     
-    public static HttpResponse makePostEvaluationCallout(String id) {
-        TicketEvaluation resposta;
-        String callout = 'callout:ReclameAquiURL' + Callout_Setting__mdt.getInstance('RA_TicketEvaluation').Endpoint__c;
+    public static HttpResponse sendEvaluationTicket(String id) {
+        TicketEvaluation content;
+        String url = makeUrlRA('RA_TicketEvaluation');
         String body = '{"id":"' + id + '"}';
-        HttpResponse response = sendPostCallout(callout, body);
+        HttpResponse response = sendPostCallout(url, body);
+
         if(response.getStatusCode() == 200) {
-        resposta = (TicketEvaluation) JSON.deserialize(response.getBody(), TicketEvaluation.class);
+        content = (TicketEvaluation) JSON.deserialize(response.getBody(), TicketEvaluation.class);
         }
-        System.debug(resposta);
+        System.debug(content);
         return response;
-        
-        
     }
     
+    private static String makeUrlRA(String nameMdt){
+        String root = 'callout:ReclameAquiURL';
+        String path = Callout_Setting__mdt.getInstance(nameMdt).Endpoint__c;
+        String url = root + path;
+        return url;
+
+    }
     
     private static HttpResponse sendGetCallout(String url){
         Http http = new Http();
