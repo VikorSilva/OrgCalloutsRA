@@ -9,7 +9,6 @@ public class ReclameAquiCallouts {
         if(response.getStatusCode() == 200) {
             content = (TicketById) JSON.deserialize(response.getBody(), TicketById.class);
         }
-        System.debug(content);
         return response;
     }
     
@@ -22,9 +21,7 @@ public class ReclameAquiCallouts {
         if(response.getStatusCode() == 200) {
         content = (PublicMessageResponse) JSON.deserialize(response.getBody(), PublicMessageResponse.class);
         }
-        System.debug(content);
         return response;
-         
     }
     
     public static HttpResponse sendEvaluationTicket(String id) {
@@ -45,7 +42,6 @@ public class ReclameAquiCallouts {
         String path = Callout_Setting__mdt.getInstance(nameMdt).Endpoint__c;
         String url = root + path;
         return url;
-
     }
     
     private static HttpResponse sendGetCallout(String url){
